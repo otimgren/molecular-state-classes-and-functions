@@ -107,13 +107,13 @@ def calculate_microwave_ME(state1, state2, reduced = False, pol_vec = np.array((
         return float(M_r)
     else:
         p_vec = {}
-        p_vec[-1] = -1/np.sqrt(2) * (pol_vec[0] + 1j *pol_vec[1])
+        p_vec[1] = -1/np.sqrt(2) * (pol_vec[0] + 1j *pol_vec[1])
         p_vec[0] = pol_vec[2]
-        p_vec[1] = +1/np.sqrt(2) * (pol_vec[0] - 1j *pol_vec[1])
+        p_vec[-1] = +1/np.sqrt(2) * (pol_vec[0] - 1j *pol_vec[1])
         
         prefactor = 0
         for p in range(-1,2):
-            prefactor +=  (-1)**(p-mJ) * p_vec[p] *  float(wigner_3j(J,1,Jprime,-mJ,-p,mJprime))
+            prefactor +=  (-1)**(p-mJ) * p_vec[-p] *  float(wigner_3j(J,1,Jprime,-mJ,-p,mJprime))
         
         
         return prefactor*float(M_r)

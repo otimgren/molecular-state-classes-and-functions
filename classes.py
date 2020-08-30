@@ -378,7 +378,7 @@ class State:
         
         #Make an numpy array of the amplitudes
         for i,d in enumerate(data):
-            amp_array[i] = (data[i][0])**2
+            amp_array[i] = (np.abs(data[i][0]))**2
         
         #Find ordering of array in descending order
         index = np.argsort(-1*amp_array)
@@ -445,4 +445,31 @@ class State:
                 state_in_coupled_basis += amp*basis_state.transform_to_coupled()
             
         return state_in_coupled_basis
-        
+
+
+    #Method for obtaining time-reversed version of state (i.e. just reverse all projection quantum numbers)
+    def time_reversed(self):
+        new_data = []
+
+        for amp, basis_state in self.data:
+            if basis_state.isCoupled:
+                F = basis_state.F
+                mF = -basis_state.mF
+                F1 = basis_state.F1
+                J = basis_state.J
+                I1 = basis_state.I1
+                I2 = basis_state.I2
+
+                new_data.append((amp, CoupledBasisState(F,mF,F1,J,I1,I2)))
+            
+            elif basis_state.isUncoupled:
+                J = basis_state.J
+                mJ = -basis_state.mJ
+                I1 = basis_state.I1
+                m1 = -basis_state.m1
+                I2 = basis_state.I2
+                m2 = -basis_state.m2
+                
+                new_data.append((amp, UncoupledBasisState(J,mJ,I1,m1,I2,m2)))
+
+        return State(new_data)
