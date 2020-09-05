@@ -446,6 +446,20 @@ class State:
             
         return state_in_coupled_basis
 
+    #Method for converting the state into the uncoupled basis
+    def transform_to_uncoupled(self):
+        #Loop over the basis states, check if they are already in uncoupled
+        #basis and if not convert to uncoupled basis, output state in new basis
+        state_in_uncoupled_basis = State()
+        
+        for amp, basis_state in self.data:
+            if basis_state.isUncoupled:
+                state_in_uncoupled_basis += State((amp,basis_state))
+            if basis_state.isCoupled:
+                state_in_uncoupled_basis += amp*basis_state.transform_to_uncoupled()
+            
+        return state_in_uncoupled_basis
+
 
     #Method for obtaining time-reversed version of state (i.e. just reverse all projection quantum numbers)
     def time_reversed(self):
