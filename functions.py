@@ -66,6 +66,57 @@ def make_hamiltonian(path, c1 = 126030.0, c2 = 17890.0,
         return Ham
 
 
+#Function for making a Hamiltonian function from a hamiltonian stored in a file
+def make_hamiltonian_B(path):
+    with open(path, 'rb') as f:
+        hamiltonians = pickle.load(f)
+
+    variables = [
+        *sympy.symbols('Brot Drot H_const'),
+        *sympy.symbols('h1_Tl h1_F'),
+        sympy.symbols('q'),
+        sympy.symbols('c_Tl'),
+        sympy.symbols('c1p_Tl'),
+        sympy.symbols('mu_B'),
+        *sympy.symbols('gS gL')
+    ]
+
+    lambdified_hamiltonians = {
+        H_name : sympy.lambdify(variables, H_matrix)
+        for H_name, H_matrix in hamiltonians.items()
+    }
+
+    #Constants in MHz
+    Brot = 6687.879e6
+    Drot = 0.010869e6
+    H_const = -8.1e-2
+    h1_Tl = 28789e6
+    h1_F = 861e6
+    q = 2.423e6
+    c_Tl = -7.83e6
+    c1p_Tl = 11.17e6
+    mu_B = 100
+    gL = 1
+    gS = 2
+
+    H = {
+        H_name : H_fn(
+            Brot, Drot, H_const,
+            h1_Tl, h1_F,
+            q,
+            c_Tl,
+            c1p_Tl,
+            mu_B,
+            gS, gL
+        )
+        for H_name, H_fn in lambdified_hamiltonians.items()
+    }
+
+    Hff = H["Hrot"]+H["H_mhf_Tl"]+H["H_mhf_F"]+H["H_c_Tl"]+H["H_cp1_Tl"]+H["H_LD"]+H["HZz"]*0.01
+
+    return Hff
+
+
 def calculate_microwave_ME(state1, state2, reduced = False, pol_vec = np.array((0,0,1))):
     """
     Function that evaluates the microwave matrix element between two states, state1 and state2, for a given polarization
@@ -235,6 +286,10 @@ def matrix_to_states(V, QN, E = None):
     for i in range(0,matrix_dimensions[1]):
         #Find state vector
         state_vector = V[:,i]
+
+        #Ensure that largest component has positive sign
+        index = np.argmax(np.abs(state_vector))
+        state_vector = state_vector * np.sign(state_vector[index])
         
         data = []
         
@@ -487,3 +542,24 @@ def reorder_degenerate_evecs(V_in,E_in,V_ref_n):
     V_out = V_in[:,index]   
     
     return E_out, V_out
+
+
+def ni_range(x0, x1, dx=1):
+    """
+    Function for generating ranges
+    """
+    # sanity check arguments
+    if dx==0:
+        raise ValueError("invalid parameters: dx==0")
+    if x0>x1 and dx>=0:
+        raise ValueError("invalid parameters: x0>x1 and dx>=0")
+    if x0<x1 and dx<=0:
+        raise ValueError("invalid parameters: x0<x1 and dx<=0")
+        
+    # generate range list
+    range_list = []
+    x = x0
+    while x < x1:
+        range_list.append(x)
+        x += dx
+    return range_list

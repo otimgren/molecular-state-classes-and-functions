@@ -189,4 +189,70 @@ def calculate_microwave_ED_matrix_element_mixed_state_uncoupled(ground_state, ex
             M += amp1*np.conjugate(amp2)*calculate_microwave_ED_matrix_element_uncoupled(basis_state1, basis_state2,reduced,pol_vec)
         
     return M
+
+### Matrix element functions for OBE integrator ### 
+from sympy.physics.wigner import wigner_3j, wigner_6j
+
+def threej_f(j1,j2,j3,m1,m2,m3):
+    return complex(wigner_3j(j1,j2,j3,m1,m2,m3))
+
+def sixj_f(j1,j2,j3,j4,j5,j6):
+    return complex(wigner_6j(j1,j2,j3,j4,j5,j6))
+
+
+def ED_ME_coupled(bra,ket, pol_vec = np.array([1,1,1]), rme_only = False):
+    """
+    Function for calculating electric dipole matrix elements between CoupledBasisStates.
+    
+    inputs:
+    ket = CoupledBasisState object
+    bra = CoupledBasisState object
+    pol_vec = polarization vector for the light that is driving the transition (the default is useful when calculating branching ratios)
+    rme_only = True if want to return reduced matrix element, False if want angular component also
+    
+    returns:
+    ME = (reduced) electric dipole matrix element between ket and bra
+    """
+    
+    #Find quantum numbers for ground state
+    F = bra.F
+    mF = bra.mF
+    J = bra.J
+    F1 = bra.F1
+    I1 = bra.I1
+    I2 = bra.I2
+    Omega = bra.Omega
+    
+    #Find quantum numbers for excited state
+    Fp = ket.F
+    mFp = ket.mF
+    Jp = ket.J
+    F1p = ket.F1
+    I1p = ket.I1
+    I2p = ket.I2
+    Omegap = ket.Omega
+    
+    #Calculate the reduced matrix element
+    q = Omega - Omegap
+    ME = ((-1)**(-F1+J+Fp+F1p+I1+I2) * np.sqrt((2*F+1)*(2*Fp+1)*(2*F1p+1)*(2*F1+1)) * sixj_f(F1p,Fp,I2,F,F1,1) 
+          * sixj_f(Jp,F1p,I1,F1,J,1) * (-1)**(J-Omega) *np.sqrt((2*J+1)*(2*Jp+1)) * threej_f(J,1,Jp,-Omega, q, Omegap)
+          * float(np.abs(q) < 2))
+    
+    #If we want the complete matrix element, calculate angular part
+    if not rme_only:
+        
+        #Calculate elements of the polarization vector in spherical basis
+        p_vec = {}
+        p_vec[-1] = -1/np.sqrt(2) * (pol_vec[0] + 1j *pol_vec[1])
+        p_vec[0] = pol_vec[2]
+        p_vec[1] = +1/np.sqrt(2) * (pol_vec[0] - 1j *pol_vec[1])
+        
+        #Calculate the value of p that connects the states
+        p = mF-mFp
+        p = p*int(np.abs(p) <= 1)
+        #Multiply RME by the angular part
+        ME = ME * (-1)**(F-mF) * threej_f(F,1,Fp, -mF, p, mFp) * p_vec[p] * int(np.abs(p) <= 1)
+    
+    #Return the matrix element
+    return ME
     
