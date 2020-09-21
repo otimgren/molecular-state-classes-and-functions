@@ -359,7 +359,7 @@ class State:
    
     #Function that returns state vector in uncoupled basis  
     def state_vector(self,QN):
-        state_vector = [self @ State([(1,state)]) for state in QN]
+        state_vector = [State([(1,state)]) @ self for state in QN]
         return np.array(state_vector,dtype = complex)
     
     #Method that removes components that are smaller than tolerance from the state   
