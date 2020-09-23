@@ -441,7 +441,7 @@ class State:
         state_vec = self.state_vector(QN)
 
         #Generate density matrix from state vector
-        density_matrix = np.tensordot(state_vec.conj(), state_vec)
+        density_matrix = np.tensordot(state_vec.conj(), state_vec, axis = 0)
 
         return density_matrix
     
