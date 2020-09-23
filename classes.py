@@ -554,5 +554,7 @@ class State:
     def make_real(self):
         reordered_state = self.order_by_amp()
         a = reordered_state.data[0][0]
-        arg = np.arctan()
+        arg = np.arctan(np.imag(a)/np.real(a))
+
+        return self*np.exp(-1j*arg)
         
