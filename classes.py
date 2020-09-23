@@ -412,7 +412,7 @@ class State:
     #Function for normalizing states
     def normalize(self):
         data = []
-        N = sp.sqrt(self@self)
+        N = np.sqrt(self@self)
         for amp, basis_state in self.data:
             data.append([amp/N, basis_state])
             
