@@ -450,8 +450,8 @@ class State:
         amp_array = np.zeros(len(data))
         
         #Make an numpy array of the amplitudes
-        for i,d in enumerate(data):
-            amp_array[i] = (data[i][0])**2
+        for i, d in enumerate(data):
+            amp_array[i] = np.abs((data[i][0]))**2
         
         #Find ordering of array in descending order
         index = np.argsort(-1*amp_array)
@@ -549,4 +549,10 @@ class State:
                 new_data.append((amp, UncoupledBasisState(J,mJ,I1,m1,I2,m2, electronic_state=electronic_state, P = P, Omega = Omega)))
 
         return State(new_data)
+
+    #Method for making the largest coefficient real
+    def make_real(self):
+        reordered_state = self.order_by_amp()
+        a = reordered_state.data[0][0]
+        arg = np.arctan()
         
