@@ -430,10 +430,20 @@ class State:
                 string = '{:.4f}'.format(complex(amp))+' x '+ string
                 print(string)
                  
-    #Function that returns state vector in given basis basis  
+    #Function that returns state vector in given basis  
     def state_vector(self,QN):
         state_vector = [1*state @ self for state in QN]
         return np.array(state_vector,dtype = complex)
+
+    #Method that generates a density matrix from state
+    def density_matrix(self, QN):
+        #Get state vector
+        state_vec = self.state_vector(QN)
+
+        #Generate density matrix from state vector
+        density_matrix = np.tensordot(state_vec.conj(), state_vec)
+
+        return density_matrix
     
     #Method that removes components that are smaller than tolerance from the state   
     def remove_small_components(self, tol = 1e-3):
@@ -556,5 +566,5 @@ class State:
         a = reordered_state.data[0][0]
         arg = np.arctan(np.imag(a)/np.real(a))
 
-        return self*np.exp(-1j*arg)
+        return self*np.exp(-1j*arg*np.sign(np.imag(a)))
         
