@@ -412,7 +412,7 @@ class State:
     #Function for normalizing states
     def normalize(self):
         data = []
-        N = sp.sqrt(self@self)
+        N = np.sqrt(self@self)
         for amp, basis_state in self.data:
             data.append([amp/N, basis_state])
             
@@ -430,10 +430,20 @@ class State:
                 string = '{:.4f}'.format(complex(amp))+' x '+ string
                 print(string)
                  
-    #Function that returns state vector in given basis basis  
+    #Function that returns state vector in given basis  
     def state_vector(self,QN):
-        state_vector = [self @ (1*state) for state in QN]
+        state_vector = [1*state @ self for state in QN]
         return np.array(state_vector,dtype = complex)
+
+    #Method that generates a density matrix from state
+    def density_matrix(self, QN):
+        #Get state vector
+        state_vec = self.state_vector(QN)
+
+        #Generate density matrix from state vector
+        density_matrix = np.tensordot(state_vec.conj(), state_vec, axes = 0)
+
+        return density_matrix
     
     #Method that removes components that are smaller than tolerance from the state   
     def remove_small_components(self, tol = 1e-3):
@@ -450,8 +460,8 @@ class State:
         amp_array = np.zeros(len(data))
         
         #Make an numpy array of the amplitudes
-        for i,d in enumerate(data):
-            amp_array[i] = (np.abs(data[i][0]))**2
+        for i, d in enumerate(data):
+            amp_array[i] = np.abs((data[i][0]))**2
         
         #Find ordering of array in descending order
         index = np.argsort(-1*amp_array)
@@ -549,4 +559,12 @@ class State:
                 new_data.append((amp, UncoupledBasisState(J,mJ,I1,m1,I2,m2, electronic_state=electronic_state, P = P, Omega = Omega)))
 
         return State(new_data)
+
+    #Method for making the largest coefficient real
+    def make_real(self):
+        reordered_state = self.order_by_amp()
+        a = reordered_state.data[0][0]
+        arg = np.arctan(np.imag(a)/np.real(a))
+
+        return self*np.exp(-1j*arg*np.sign(np.imag(a)))
         
