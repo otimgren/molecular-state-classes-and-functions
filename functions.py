@@ -291,18 +291,16 @@ def matrix_to_states(V, QN, E = None):
         index = np.argmax(np.abs(state_vector))
         state_vector = state_vector * np.sign(state_vector[index])
         
-        data = []
+        state = State()
         
         #Get data in correct format for initializing state object
         for j, amp in enumerate(state_vector):
-            data.append((amp, QN[j]))
-            
-        #Store the state in the list
-        state = State(data)
-        
+            state += amp*QN[j]
+                    
         if E is not None:
             state.energy = E[i]
-        
+
+        #Store the state in the list
         eigenstates.append(state)
         
     
@@ -310,13 +308,13 @@ def matrix_to_states(V, QN, E = None):
     return eigenstates
 
 def vector_to_state(state_vector, QN, E = None):
-    data = []
+    state = State()
     
     #Get data in correct format for initializing state object
     for j, amp in enumerate(state_vector):
-        data.append((amp, QN[j]))
+        state += amp*QN[j]
         
-    return State(data)
+    return state
 
 #Function for tracing the energy of a given state as electromagnetic field
 #is varied
@@ -434,7 +432,7 @@ def find_state_idx(input_vec, state_vecs, n = 1):
 
 
 
-def find_state_idx_from_state(H, reference_state, QN):
+def find_state_idx_from_state(H, reference_state, QN, V_ref = None):
     """
     This function determines the index of the state vector most closely corresponding
     to an input state 
@@ -449,9 +447,11 @@ def find_state_idx_from_state(H, reference_state, QN):
     
     #Find eigenvectors of the given Hamiltonian
     E, V = np.linalg.eigh(H)    
-    
-    
-    
+
+    #Reorder evecs to match V_ref if it's not none
+    if V_ref is not None:
+        E, V = reorder_evecs(V,E,V_ref)
+
     overlaps = np.dot(np.conj(reference_state_vec),V)
     probabilities = overlaps*np.conj(overlaps)
     

@@ -451,7 +451,7 @@ class State:
         
         #Make an numpy array of the amplitudes
         for i,d in enumerate(data):
-            amp_array[i] = (data[i][0])**2
+            amp_array[i] = (np.abs(data[i][0]))**2
         
         #Find ordering of array in descending order
         index = np.argsort(-1*amp_array)

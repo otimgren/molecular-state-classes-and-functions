@@ -234,7 +234,7 @@ def ED_ME_coupled(bra,ket, pol_vec = np.array([1,1,1]), rme_only = False):
     
     #Calculate the reduced matrix element
     q = Omega - Omegap
-    ME = ((-1)**(-F1+J+Fp+F1p+I1+I2) * np.sqrt((2*F+1)*(2*Fp+1)*(2*F1p+1)*(2*F1+1)) * sixj_f(F1p,Fp,I2,F,F1,1) 
+    ME = ((-1)**(F1+J+Fp+F1p+I1+I2) * np.sqrt((2*F+1)*(2*Fp+1)*(2*F1p+1)*(2*F1+1)) * sixj_f(F1p,Fp,I2,F,F1,1) 
           * sixj_f(Jp,F1p,I1,F1,J,1) * (-1)**(J-Omega) *np.sqrt((2*J+1)*(2*Jp+1)) * threej_f(J,1,Jp,-Omega, q, Omegap)
           * float(np.abs(q) < 2))
     
