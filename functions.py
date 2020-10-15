@@ -112,7 +112,7 @@ def make_hamiltonian_B(path):
         for H_name, H_fn in lambdified_hamiltonians.items()
     }
 
-    Hff = H["Hrot"]+H["H_mhf_Tl"]+H["H_mhf_F"]+H["H_c_Tl"]+H["H_cp1_Tl"]+H["H_LD"]+H["HZz"]*0.01
+    Hff = 2*np.pi*(H["Hrot"]+H["H_mhf_Tl"]+H["H_mhf_F"]+H["H_c_Tl"]+H["H_cp1_Tl"]+H["H_LD"]+H["HZz"]*0.01)
 
     return Hff
 
