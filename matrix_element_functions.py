@@ -255,4 +255,91 @@ def ED_ME_coupled(bra,ket, pol_vec = np.array([1,1,1]), rme_only = False):
     
     #Return the matrix element
     return ME
+
+#Function for evaluation the electric dipole matrix element between a ground state and excited state in uncoupled basis
+def ED_ME_uncoupled(bra,ket, pol_vec = np.array([1,1,1]), rme_only = False):
+    #Find quantum numbers for ground state
+    J = bra.J
+    mJ = float(bra.mJ)
+    I1 = bra.I1
+    m1 = bra.m1
+    I2 = bra.I2
+    m2 = bra.m2
+    
+    #Find quantum numbers of excited state
+    Jprime = ket.J
+    mJprime = ket.mJ
+    I1prime = ket.I1
+    m1prime = ket.m1
+    I2prime = ket.I2
+    m2prime = ket.m2
+    
+    #Calculate reduced matrix element
+    M_r = (threej_f(J,1,Jprime,0,0,0) * np.sqrt((2*J+1)*(2*Jprime+1)) 
+            * float(I1 == I1prime and m1 == m1prime 
+                    and I2 == I2prime and m2 == m2prime))
+    
+    
+    #If reduced matrix element is desired, return that. Otherwise calculate the angular prefactor
+    #for the matrix element.
+    if rme_only:
+        return M_r
+    else:
+        p_vec = {}
+        p_vec[-1] = -1/np.sqrt(2) * (pol_vec[0] + 1j *pol_vec[1])
+        p_vec[0] = pol_vec[2]
+        p_vec[1] = +1/np.sqrt(2) * (pol_vec[0] - 1j *pol_vec[1])
+        
+        prefactor = 0
+        for p in range(-1,2):
+            prefactor +=  (-1)**(p-mJ) * p_vec[p] *  threej_f(J,1,Jprime,-mJ,-p,mJprime)
+        
+        
+        return prefactor*M_r
+
+#Function for calculating matrix elements between states that are superpositions
+#in coupled basis
+def ED_ME_mixed_state(bra, ket, pol_vec = np.array([1,1,1]), reduced = False):
+    """
+    Calculates electric dipole matrix elements between mixed states
+
+    inputs:
+    bra = state object
+    ket = state object
+    pol_vec = polarization vector for the light that is driving the transition (the default is useful when calculating branching ratios)
+
+    outputs:
+    ME = matrix element between the two states
+    """
+    ME = 0
+    bra = bra.transform_to_omega_basis()
+    ket = ket.transform_to_omega_basis()
+    for amp_bra, basis_bra in bra.data:
+        for amp_ket, basis_ket in ket.data:
+            ME += amp_bra.conjugate()*amp_ket*ED_ME_coupled(basis_bra, basis_ket, pol_vec = pol_vec, rme_only = reduced)
+
+    return ME
+
+#Function for calculating matrix elements between states that are superpositions
+#in coupled basis
+def ED_ME_mixed_state_uc(bra, ket, pol_vec = np.array([1,1,1]), reduced = False):
+    """
+    Calculates electric dipole matrix elements between mixed states
+
+    inputs:
+    bra = state object
+    ket = state object
+    pol_vec = polarization vector for the light that is driving the transition (the default is useful when calculating branching ratios)
+
+    outputs:
+    ME = matrix element between the two states
+    """
+    ME = 0
+    bra = bra.transform_to_omega_basis()
+    ket = ket.transform_to_omega_basis()
+    for amp_bra, basis_bra in bra.data:
+        for amp_ket, basis_ket in ket.data:
+            ME += amp_bra.conjugate()*amp_ket*ED_ME_uncoupled(basis_bra, basis_ket, pol_vec = pol_vec, rme_only = reduced)
+
+    return ME
     

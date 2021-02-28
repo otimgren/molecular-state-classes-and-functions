@@ -170,7 +170,7 @@ def calculate_microwave_ME(state1, state2, reduced = False, pol_vec = np.array((
         return prefactor*float(M_r)
     
     
-def make_H_mu(J1, J2, omega_mu, QN, pol_vec = np.array((0,0,1))):
+def make_H_mu(J1, J2, QN, pol_vec = np.array((0,0,1))):
     """
     Function that generates Hamiltonian for microwave transitions between J1 and J2 (all hyperfine states) for given
     polarization of microwaves. Rotating wave approximation is applied implicitly by only taking the exp(+i*omega*t) part
@@ -208,11 +208,11 @@ def make_H_mu(J1, J2, omega_mu, QN, pol_vec = np.array((0,0,1))):
     #Make H_mu hermitian
     H_mu = (H_mu + np.conj(H_mu.T)) - np.diag(np.diag(H_mu))
     
-    #Convert H_mu into a lambda function
-    H_mu_fun = lambda t: H_mu * np.exp(+1j*omega_mu*t)
+    #Make H_mu hermitian
+    H_mu = (H_mu + np.conj(H_mu.T)) - np.diag(np.diag(H_mu))
     
-    #return the hamiltonian matrix as a function of t
-    return H_mu_fun
+    #return the coupling matrix
+    return H_mu
 
 def make_transform_matrix(J1, J2, omega_mu, QN, I1 = 1/2, I2 = 1/2):
     """
@@ -488,6 +488,25 @@ def find_closest_state(H, reference_state, QN):
     
     return state
 
+def find_closest_vector_idx(state_vec, vector_array):
+    """
+    Function that finds the index of the vector in vector_array that most closely matches
+    state_vec. vector_array is array where each column is a vector, typically corresponding to an
+    eigenstate of some Hamiltonian.
+
+    inputs:
+    state_vec = Numpy array, 1D
+    vector_array = Numpy array, 2D
+
+    returns:
+    idx = index that corresponds to closest matching vector
+    """
+
+    overlaps = np.abs(state_vec.conj().T @ vector_array)
+    idx = np.argmax(overlaps)
+
+    return idx
+
 
 """ 
 Function to reshuffle the eigenvectors and eigenenergies based on a reference
@@ -563,3 +582,22 @@ def ni_range(x0, x1, dx=1):
         range_list.append(x)
         x += dx
     return range_list
+
+
+#Function for finding dark and bright states for a system of levels that are coupled to a single
+#
+def find_dark_states(excited_state, ground_states):
+    """
+    Function for finding dark and bright states for a system of levels that are coupled to a single
+    excited state
+
+    intputs:
+    excited_state = excited state to which the ground states are coupled
+    ground_states = list of teh ground states that couple to excited state
+
+    outputs:
+    bright_state = superposition of ground states that has non-zero matrix element with excited state
+    dark_states = superpositions which don't have non-zero matrix element with excited state
+    """
+
+    
